@@ -1,12 +1,13 @@
 package com.dicoding.asclepius.view
 
-import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.dicoding.asclepius.R
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import com.dicoding.asclepius.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -14,17 +15,45 @@ class MainActivity : AppCompatActivity() {
 
     private var currentImageUri: Uri? = null
 
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            currentImageUri = uri
+            showImage()
+        } else {
+            showToast("No media selected")
+        }
+    }
+
+    private val pickMediaLegacy = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            currentImageUri = uri
+            showImage()
+        } else {
+            showToast("No media selected")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.galleryButton.setOnClickListener { startGallery() }
+        binding.analyzeButton.setOnClickListener { analyzeImage() }
     }
 
     private fun startGallery() {
-        // TODO: Mendapatkan gambar dari Gallery.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        } else {
+            pickMediaLegacy.launch("image/*")
+        }
     }
 
     private fun showImage() {
-        // TODO: Menampilkan gambar sesuai Gallery yang dipilih.
+        currentImageUri?.let {
+            binding.previewImageView.setImageURI(it)
+        }
     }
 
     private fun analyzeImage() {
