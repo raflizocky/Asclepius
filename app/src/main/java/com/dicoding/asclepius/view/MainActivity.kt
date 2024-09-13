@@ -5,13 +5,21 @@ import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.dicoding.asclepius.databinding.ActivityMainBinding
+import com.dicoding.asclepius.helper.ImageClassifierHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.tensorflow.lite.task.vision.classifier.Classifications
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListener {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var imageClassifierHelper: ImageClassifierHelper
 
     private var currentImageUri: Uri? = null
 
@@ -38,6 +46,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        imageClassifierHelper = ImageClassifierHelper(
+            threshold = 0.5f,
+            maxResults = 1,
+            modelName = "cancer_classification.tflite",
+            context = this,
+            classifierListener = this
+        )
+
         binding.galleryButton.setOnClickListener { startGallery() }
         binding.analyzeButton.setOnClickListener { analyzeImage() }
     }
@@ -56,8 +72,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onError(error: String) {
+        runOnUiThread {
+            binding.progressIndicator.visibility = View.GONE
+            showToast(error)
+        }
+    }
+
     private fun analyzeImage() {
         // TODO: Menganalisa gambar yang berhasil ditampilkan.
+        if (currentImageUri != null) {
+            binding.progressIndicator.visibility = View.VISIBLE
+            imageClassifierHelper.classifyStaticImage(currentImageUri!!)
+        } else {
+            showToast("Please select an image first")
+        }
+    }
+
+    override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
+        runOnUiThread {
+            binding.progressIndicator.visibility = View.GONE
+            results?.let { classifications ->
+                if (classifications.isNotEmpty() && classifications[0].categories.isNotEmpty()) {
+                    val category = classifications[0].categories[0]
+                    showToast("Result: ${category.label}, Score: ${category.score}, Time: ${inferenceTime}ms")
+                } else {
+                    showToast("No valid classifications found")
+                }
+            } ?: showToast("No results")
+        }
     }
 
     private fun moveToResult() {
