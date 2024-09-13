@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListen
             results?.let { classifications ->
                 if (classifications.isNotEmpty() && classifications[0].categories.isNotEmpty()) {
                     val category = classifications[0].categories[0]
-                    showToast("Result: ${category.label}, Score: ${category.score}, Time: ${inferenceTime}ms")
+                    moveToResult(category.label, category.score, inferenceTime, currentImageUri)
                 } else {
                     showToast("No valid classifications found")
                 }
@@ -103,8 +103,13 @@ class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListen
         }
     }
 
-    private fun moveToResult() {
-        val intent = Intent(this, ResultActivity::class.java)
+    private fun moveToResult(label: String, score: Float, inferenceTime: Long, imageUri: Uri?) {
+        val intent = Intent(this, ResultActivity::class.java).apply {
+            putExtra("LABEL", label)
+            putExtra("SCORE", score)
+            putExtra("INFERENCE_TIME", inferenceTime)
+            putExtra("IMAGE_URI", imageUri.toString())
+        }
         startActivity(intent)
     }
 
