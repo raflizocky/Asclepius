@@ -11,11 +11,8 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.dicoding.asclepius.databinding.ActivityMainBinding
 import com.dicoding.asclepius.helper.ImageClassifierHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.tensorflow.lite.task.vision.classifier.Classifications
+import java.util.Locale
 
 class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListener {
     private lateinit var binding: ActivityMainBinding
@@ -95,7 +92,11 @@ class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListen
             results?.let { classifications ->
                 if (classifications.isNotEmpty() && classifications[0].categories.isNotEmpty()) {
                     val category = classifications[0].categories[0]
-                    moveToResult(category.label, category.score, inferenceTime, currentImageUri)
+                    if (category.label.lowercase(Locale.getDefault())== "cancer" && category.score >= 0.5) {
+                        moveToResult(category.label, category.score, inferenceTime, currentImageUri)
+                    } else {
+                        showToast("The image does not indicate cancer or is not a valid medical image.")
+                    }
                 } else {
                     showToast("No valid classifications found")
                 }

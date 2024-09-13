@@ -23,6 +23,7 @@ class ResultActivity : AppCompatActivity() {
         displayResults(label, score, inferenceTime)
         displayImage(imageUriString)
     }
+
     private fun displayResults(label: String, score: Float, inferenceTime: Long) {
         val resultText = """
             Prediction: $label
