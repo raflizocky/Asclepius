@@ -3,6 +3,7 @@ package com.dicoding.asclepius.view
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import com.dicoding.asclepius.R
 import com.dicoding.asclepius.databinding.ActivityResultBinding
 
@@ -13,6 +14,8 @@ class ResultActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.statusBarColor = ContextCompat.getColor(this, R.color.primary)
 
         // TODO: Menampilkan hasil gambar, prediksi, dan confidence score.
         val label = intent.getStringExtra("LABEL") ?: "Unknown"
@@ -25,13 +28,9 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun displayResults(label: String, score: Float, inferenceTime: Long) {
-        val resultText = """
-            Prediction: $label
-            Confidence: ${String.format("%.2f%%", score * 100)}
-            Inference Time: $inferenceTime ms
-        """.trimIndent()
-
-        binding.resultText.text = resultText
+        binding.resultLabel.text = "Prediction: $label"
+        binding.resultScore.text = "Confidence: ${String.format("%.2f%%", score * 100)}"
+        binding.resultInferenceTime.text = "Inference Time: $inferenceTime ms"
     }
 
     private fun displayImage(imageUriString: String?) {
