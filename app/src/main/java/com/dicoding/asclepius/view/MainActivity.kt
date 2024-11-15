@@ -38,6 +38,11 @@ class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListen
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        currentImageUri?.let { outState.putString("IMAGE_URI", it.toString()) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -53,6 +58,11 @@ class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListen
 
         binding.galleryButton.setOnClickListener { startGallery() }
         binding.analyzeButton.setOnClickListener { analyzeImage() }
+
+        savedInstanceState?.getString("IMAGE_URI")?.let { uriString ->
+            currentImageUri = Uri.parse(uriString)
+            showImage()
+        }
     }
 
     private fun startGallery() {
@@ -92,15 +102,13 @@ class MainActivity : AppCompatActivity(), ImageClassifierHelper.ClassifierListen
             results?.let { classifications ->
                 if (classifications.isNotEmpty() && classifications[0].categories.isNotEmpty()) {
                     val category = classifications[0].categories[0]
-                    if (category.label.lowercase(Locale.getDefault())== "cancer" && category.score >= 0.5) {
+                    if (category.label.lowercase(Locale.getDefault()) == "cancer" && category.score >= 0.5) {
                         moveToResult(category.label, category.score, inferenceTime, currentImageUri)
                     } else {
-                        showToast("The image does not indicate cancer or is not a valid medical image.")
+                        moveToResult("Invalid", 0f, inferenceTime, currentImageUri)
                     }
-                } else {
-                    showToast("No valid classifications found")
                 }
-            } ?: showToast("No results")
+            }
         }
     }
 
