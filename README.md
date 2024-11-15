@@ -4,7 +4,7 @@
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/b6d6e0b3-f9e5-4e13-bf5b-0d10d3d6d50f"></video>
+<video src="https://github.com/user-attachments/assets/dcffd5b0-2008-415b-880c-8e4cc1296241"></video>
 
 ## Features
 
