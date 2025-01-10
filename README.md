@@ -33,4 +33,4 @@ If you encounter any issues or would like to contribute to the project, feel fre
 
 ## License
 
-Code released under the [MIT License](https://github.com/raflizocky/Asclepius/blob/master/LICENSE).
+Code released under the [MIT License](https://github.com/raflizocky/Asclepius/blob/master/LICENSE.txt).
